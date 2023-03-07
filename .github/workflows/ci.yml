@@ -28,10 +28,10 @@ jobs:
 
         steps:
             - name: "Checkout code"
-              uses: actions/checkout@v2.3.3
+              uses: actions/checkout@v3
 
             - name: "Install PHP with extensions"
-              uses: shivammathur/setup-php@2.7.0
+              uses: shivammathur/setup-php@v2
               with:
                   coverage: "none"
                   php-version: ${{ matrix.php-version }}
@@ -45,7 +45,7 @@ jobs:
               run: echo "::set-output name=dir::$(composer config cache-files-dir)"
 
             - name: "Cache composer"
-              uses: actions/cache@v2.1.2
+              uses: actions/cache@v3
               with:
                   path: ${{ steps.composer-cache.outputs.dir }}
                   key: ${{ runner.os }}-${{ matrix.php-version }}-composer-${{ hashFiles('composer.json') }}-deps-${{ matrix.deps }}-allow-failures-${{ matrix.allow-failures }}
