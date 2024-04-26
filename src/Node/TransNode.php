@@ -92,7 +92,7 @@ class TransNode extends Node
 
         if ($vars) {
             $compiler
-                ->write('echo strtr('.$function.'(')
+                ->write('yield strtr('.$function.'(')
                 ->subcompile($msg)
             ;
 
@@ -133,7 +133,7 @@ class TransNode extends Node
             $compiler->raw("));\n");
         } else {
             $compiler
-                ->write('echo '.$function.'(')
+                ->write('yield '.$function.'(')
                 ->subcompile($msg)
             ;
 
