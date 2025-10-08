@@ -12,14 +12,17 @@
 namespace Twig\Extensions;
 
 use Twig\Compiler;
+use Twig\TwigFilter;
 use Twig\Node\Node;
 use Twig\Error\SyntaxError;
 use Twig\Node\Expression\FilterExpression;
 use Twig\Node\Expression\ConstantExpression;
+use Twig\Attribute\FirstClassTwigCallableReady;
 
 class AsFilterExpression extends FilterExpression
 {
-    public function __construct(Node $node, ConstantExpression $filterName, Node $arguments, int $lineno, string $tag = null)
+    #[FirstClassTwigCallableReady]
+    public function __construct(Node $node, TwigFilter|ConstantExpression $filterName, Node $arguments, int $lineno, string|null $tag = null)
     {
         if (($arguments->count() != 1) || (!$arguments->getNode(0) instanceof ConstantExpression)) {
             throw new SyntaxError('Invalid parameters to "as" filter.', $lineno);

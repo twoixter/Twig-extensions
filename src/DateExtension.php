@@ -14,6 +14,7 @@ namespace Twig\Extensions;
 use Symfony\Component\Translation\IdentityTranslator;
 use Symfony\Component\Translation\TranslatorInterface;
 use Twig\Environment;
+use Twig\Extension\CoreExtension;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFilter;
 
@@ -32,8 +33,9 @@ class DateExtension extends AbstractExtension
     ];
 
     private $translator;
+    private $coreExtension;
 
-    public function __construct(TranslatorInterface $translator = null)
+    public function __construct(TranslatorInterface|null $translator = null)
     {
         // Ignore the IdentityTranslator, otherwise the parameters won't be replaced properly
         if ($translator instanceof IdentityTranslator) {
@@ -41,6 +43,7 @@ class DateExtension extends AbstractExtension
         }
 
         $this->translator = $translator;
+        $this->coreExtension = new CoreExtension();
     }
 
     public function getFilters()
@@ -61,8 +64,8 @@ class DateExtension extends AbstractExtension
     public function diff(Environment $env, $date, $now = null)
     {
         // Convert both dates to DateTime instances.
-        $date = twig_date_converter($env, $date);
-        $now = twig_date_converter($env, $now);
+        $date = $this->coreExtension->convertDate($date);
+        $now = $this->coreExtension->convertDate($now);
 
         // Get the difference between the two DateTime objects.
         $diff = $date->diff($now);

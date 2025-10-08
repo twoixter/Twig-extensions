@@ -19,14 +19,16 @@ use Twig\Node\Expression\AbstractExpression;
 use Twig\Node\Expression\ConstantExpression;
 use Twig\Node\Expression\FilterExpression;
 use Twig\Node\Expression\GetAttrExpression;
-use Twig\Node\Expression\NameExpression;
-use Twig\Node\Expression\TempNameExpression;
+use Twig\Node\Expression\Variable\ContextVariable;  // Previously Twig\Node\Expression\NameExpression
+use Twig\Node\Expression\Variable\LocalVariable;    // Previously Twig\Node\Expression\TempNameExpression
 use Twig\Node\Node;
 use Twig\Node\PrintNode;
+use Twig\Attribute\YieldReady;
 
 /**
  * @author Fabien Potencier <fabien@symfony.com>
  */
+#[YieldReady]
 class TransNode extends Node
 {
     /**
@@ -38,12 +40,12 @@ class TransNode extends Node
 
     public function __construct(
         Node $body,
-        Node $plural = null,
-        AbstractExpression $count = null,
-        Node $notes = null,
-        $lineno,
-        $tag = null,
-        TransNodeOptions $options = null
+        Node|null $plural = null,
+        AbstractExpression|null $count = null,
+        Node|null $notes = null,
+        $lineno = 0,
+        string|null $tag = null,
+        TransNodeOptions|null $options = null
     ) {
         $nodes = ['body' => $body];
         if (null !== $count) {
@@ -61,7 +63,7 @@ class TransNode extends Node
             $this->options = new TransNodeOptions();
         }
 
-        parent::__construct($nodes, [], $lineno, $tag);
+        parent::__construct($nodes, [], $lineno);
     }
 
     public function compile(Compiler $compiler)
@@ -153,7 +155,7 @@ class TransNode extends Node
 
     private function compileString(Node $body, array $vars): array
     {
-        if ($body instanceof NameExpression || $body instanceof ConstantExpression || $body instanceof TempNameExpression) {
+        if ($body instanceof ContextVariable || $body instanceof ConstantExpression || $body instanceof LocalVariable) {
             return [$body, []];
         }
 
@@ -188,7 +190,7 @@ class TransNode extends Node
                             $n = $n->getNode('expr');
                         }
                         $msg .= sprintf('%s%s%s', $delims[0], $n->getAttribute('name'), $delims[1]);
-                        $vars[] = new NameExpression($n->getAttribute('name'), $n->getTemplateLine());
+                        $vars[] = new ContextVariable($n->getAttribute('name'), $n->getTemplateLine());
                     }
                 } else {
                     $msg .= $node->getAttribute('data');
@@ -198,7 +200,7 @@ class TransNode extends Node
             $msg = $body->getAttribute('data');
         }
 
-        return [new Node([new ConstantExpression($this->options->getNormalize() ? $this->normalizeString($msg) : trim($msg), $body->getTemplateLine())]), $vars];
+        return [new ConstantExpression($this->options->getNormalize() ? $this->normalizeString($msg) : trim($msg), $body->getTemplateLine()), $vars];
     }
 
     /**
@@ -288,7 +290,7 @@ class TransNode extends Node
             );
         }
 
-        if (($node instanceof NameExpression) || ($node instanceof TempNameExpression)) {
+        if (($node instanceof ContextVariable) || ($node instanceof LocalVariable)) {
             return [$node->getAttribute('name')];
         }
 

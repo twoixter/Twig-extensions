@@ -17,7 +17,8 @@
     },
     "require-dev": {
         "symfony/phpunit-bridge": "^4.2|^5.0|^6.0",
-        "symfony/translation": "^3.4|^4.2|^5.0|^6.0"
+        "symfony/translation": "^3.4|^4.2|^5.0|^6.0",
+        "phpunit/phpunit": "^9.6"
     },
     "suggest": {
         "symfony/translation": "Allow the time_diff output to be translated"

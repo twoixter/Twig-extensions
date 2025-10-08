@@ -37,11 +37,13 @@ namespace Twig\Extensions
 namespace
 {
     use Twig\Environment;
+    use Twig\Extension\CoreExtension;
     use Twig\Error\SyntaxError;
 
     function twig_localized_date_filter(Environment $env, $date, $dateFormat = 'medium', $timeFormat = 'medium', $locale = null, $timezone = null, $format = null, $calendar = 'gregorian')
     {
-        $date = \twig_date_converter($env, $date, $timezone);
+        $coreExt = new CoreExtension();
+        $date = $coreExt->convertDate($date, $timezone);
 
         $formatValues = [
             'none' => \IntlDateFormatter::NONE,

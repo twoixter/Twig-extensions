@@ -15,13 +15,15 @@ use PHPUnit\Framework\TestCase;
 use Twig\Compiler;
 use Twig\Environment;
 use Twig\Error\SyntaxError;
+use Twig\Extension\CoreExtension;
 use Twig\Extensions\AsFilterExpression;
 use Twig\Extensions\I18nExtension;
 use Twig\Lexer;
+use Twig\TwigFilter;
 use Twig\Loader\ArrayLoader;
 use Twig\Node\Expression\ConstantExpression;
 use Twig\Node\Expression\FilterExpression;
-use Twig\Node\Node;
+use Twig\Node\Nodes;
 use Twig\Parser;
 use Twig\Source;
 
@@ -67,21 +69,23 @@ class AsFilterTest extends TestCase
         $expr = new ConstantExpression('foo', 1);
         $node = $this->createFilter($expr, 'as', [new ConstantExpression('bar', 1)]);
         $node = $this->createFilter($node, 'upper');
-        $tests[] = [$node, 'twig_upper_filter($this->env, "foo")'];
+        $tests[] = [$node, 'Twig\Extension\CoreExtension::upper($this->env->getCharset(), "foo")'];
 
         $expr = new ConstantExpression('foo', 1);
         $node = $this->createFilter($expr, 'upper');
         $node = $this->createFilter($node, 'as', [new ConstantExpression('bar', 1)]);
-        $tests[] = [$node, 'twig_upper_filter($this->env, "foo")'];
+        $tests[] = [$node, 'Twig\Extension\CoreExtension::upper($this->env->getCharset(), "foo")'];
 
         return $tests;
     }
 
     protected function createFilter($node, $tag, array $arguments = [])
     {
-        $name = new ConstantExpression($tag, 1);
-        $arguments = new Node($arguments);
-
+        $arguments = new Nodes($arguments);
+        $name = $tag == 'as'
+            ? new TwigFilter($tag, null, [ "node_class" => AsFilterExpression::class ])
+            // Taken from Twig\Extension\CoreExtension
+            : new TwigFilter($tag, [CoreExtension::class, $tag], ['needs_charset' => true]);
         return $tag == 'as'
             ? new AsFilterExpression($node, $name, $arguments, 1)
             : new FilterExpression($node, $name, $arguments, 1);
